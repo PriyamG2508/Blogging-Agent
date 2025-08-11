@@ -1,0 +1,8 @@
+langchain-groq==0.1.9
+langgraph==0.2.16
+python-dotenv==1.0.1
+requests==2.31.0
+pathlib==1.0.1
+typing-extensions==4.12.2
+langchain-core==0.2.38
+langchain-community==0.2.16
