@@ -71,6 +71,7 @@ class TopicSearchAgent:
                             'title': post_data['title'],
                             'subreddit': subreddit,
                             'url': post_data['url'] if not post_data['is_self'] else f"https://reddit.com{post_data['permalink']}",
+                            'is_self_post': post_data['is_self'], # <-- THE CRITICAL ADDITION
                             'created_utc': post_data['created_utc'],
                             'freshness': freshness_hours,
                             'score': post_data['score'],
