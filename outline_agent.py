@@ -68,3 +68,69 @@ class OutlineAgent:
         except Exception as e:
             print(f"❌ An exception occurred in the Groq Outline Agent: {e}")
             return ""
+        
+import os
+import json
+from dotenv import load_dotenv
+from outline_agent import OutlineAgent
+
+# Load environment variables
+load_dotenv()
+
+def run_test():
+    """A simple script to test the OutlineAgent in isolation."""
+    try:
+        # Instantiate the agent
+        agent = OutlineAgent()
+
+        # The topic title and gap report from the successful Content Gap Analysis
+        test_topic_title = "Meta hires anti-diversity activist Robby Starbuck as AI advisor to settle lawsuit"
+        test_gap_report = {
+            "summary": "The search results primarily focus on the controversy surrounding Robby Starbuck's appointment as an AI advisor. However, there is a lack of in-depth discussion on the broader implications of this hire, such as its impact on AI development and the role of DEI.",
+            "gaps": [
+                {
+                    "topic": "The Definition of AI Bias",
+                    "description": "None of the search results provide a comprehensive definition of AI bias or what constitutes fairness in AI. A deeper discussion on the topic can foster a better understanding of the issues involved."
+                },
+                {
+                    "topic": "Technical Aspects of AI Bias",
+                    "description": "While the results touch on the controversy, none delve into the technical aspects of AI bias, such as how AI models can perpetuate biases and what methods are used to identify and mitigate them. Providing technical insights can enhance the overall understanding of the subject."
+                },
+                {
+                    "topic": "Alternatives to Robby Starbuck",
+                    "description": "The search results focus solely on Starbuck's appointment, without exploring alternative perspectives or experts who could have been considered for the role. Discussing potential alternatives or other approaches to addressing AI bias can broaden the conversation."
+                },
+                {
+                    "topic": "The Role of DEI in AI Development",
+                    "description": "The search results highlight Starbuck's anti-DEI views, but there is no discussion on the importance of Diversity, Equity, and Inclusion (DEI) in AI development. Exploring the relationship between DEI and AI can lead to a more comprehensive understanding of the subject."
+                },
+                {
+                    "topic": "Long-term Impact on AI Development",
+                    "description": "The search results primarily focus on the controversy surrounding Starbuck's appointment. However, there is limited discussion on the long-term implications of allowing anti-diversity activists to influence AI development. A deeper analysis of the potential consequences can provide valuable insights for future AI development."
+                },
+                {
+                    "topic": "Resources for Addressing AI Bias",
+                    "description": "The search results do not provide resources for individuals or organizations seeking to address AI bias in their own projects or systems. Providing resources, such as guides, tutorials, or toolkits, can empower readers to take action against AI bias."
+                }
+            ]
+        }
+
+        print("--- Starting Test of OutlineAgent ---")
+        blog_outline = agent.create_outline(test_topic_title, test_gap_report)
+
+        print("\n--- Test Completed ---")
+        if blog_outline:
+            print("✅ Success! Outline generated. Check the output below:")
+            print("=" * 60)
+            print(blog_outline)
+            print("=" * 60)
+        else:
+            print("❌ Failure: Outline Agent returned an empty response. This may indicate an API or prompt issue.")
+
+    except ValueError as e:
+        print(f"❌ Initialization Error: {e}")
+    except Exception as e:
+        print(f"❌ An unexpected error occurred: {e}")
+
+if __name__ == "__main__":
+    run_test()

@@ -1,87 +1,105 @@
 import os
 import json
 import requests
-import trafilatura
-import google.generativeai as genai
-from googleapiclient.discovery import build
-from dotenv import load_dotenv
+import re
 from typing import List, Dict, Optional
+from dotenv import load_dotenv
+from groq import Groq
+from googleapiclient.discovery import build
+from langchain.prompts import PromptTemplate # Added for PromptTemplate
 
 class ContentGapAgent:
     """
     A self-contained agent to analyze topics. It handles user selection,
-    finds related articles for discussion threads, and analyzes content for gaps.
+    finds related articles via search, and analyzes content for gaps.
+    This version performs a collective analysis on multiple search results
+    instead of scraping a single URL.
     """
-    LLM_MODEL_NAME = 'gemini-1.5-pro-latest'
+    LLM_MODEL_NAME = 'llama3-8b-8192'
 
     def __init__(self):
         load_dotenv()
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
+        groq_api_key = os.getenv("GROQ_API_KEY")
         self.search_api_key = os.getenv("SEARCH_API_KEY")
         self.search_engine_id = os.getenv("SEARCH_ENGINE_ID")
 
-        if not all([gemini_api_key, self.search_api_key, self.search_engine_id]):
+        if not all([groq_api_key, self.search_api_key, self.search_engine_id]):
             raise ValueError("One or more API keys are missing. Please check your .env file.")
 
-        genai.configure(api_key=gemini_api_key)
-        self.llm_model = genai.GenerativeModel(self.LLM_MODEL_NAME)
-        self.user_agent = 'BloggerAI_Analyst/2.0'
+        self.llm_client = Groq(api_key=groq_api_key)
+        self.user_agent = 'BloggerAI_Analyst/3.0'
 
-    def _find_related_article(self, query: str) -> Optional[str]:
-        """Uses Google Search to find the top article for a query."""
-        print(f"\nSearching for an article related to: '{query}'...")
+    def _find_related_articles(self, query: str, num_results: int = 5) -> List[Dict]:
+        """Uses Google Search to find top articles, returning titles and snippets."""
+        print(f"\nSearching for {num_results} articles related to: '{query}'...")
         try:
             service = build("customsearch", "v1", developerKey=self.search_api_key)
-            result = service.cse().list(q=query, cx=self.search_engine_id, num=1).execute()
+            result = service.cse().list(q=query, cx=self.search_engine_id, num=num_results).execute()
             
+            articles = []
             if 'items' in result and result['items']:
-                top_url = result['items'][0]['link']
-                print(f"Found article: {top_url}")
-                return top_url
-            print("Could not find a relevant article.")
-            return None
+                for item in result['items']:
+                    articles.append({
+                        'title': item.get('title'),
+                        'snippet': item.get('snippet'),
+                        'link': item.get('link')
+                    })
+                print(f"Found {len(articles)} articles.")
+                return articles
+            
+            print("Could not find any relevant articles.")
+            return []
         except Exception as e:
             print(f"An error occurred during search: {e}")
-            return None
+            return []
 
-    def _analyze_gaps_in_article(self, url: str) -> Dict:
-        """Fetches an article URL and analyzes it for content gaps."""
-        print(f"Analyzing article for gaps: {url}")
+    def _analyze_collective_gaps(self, articles: List[Dict]) -> Dict:
+        """Analyzes a list of search result snippets for content gaps using an LLM."""
+        print(f"Analyzing {len(articles)} search results for gaps...")
         
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
-        }
-        
-        try:
-            response = requests.get(url, headers=headers, timeout=15)
-            response.raise_for_status()
-            html_content = response.text
-        except requests.RequestException as e:
-            return {"error": f"Failed to download article: {e}"}
-        
-        article_text = trafilatura.extract(html_content)
-        if not article_text:
-            return {"error": "Downloaded page, but could not extract a main article (website might be heavily reliant on JavaScript)."}
-        
-        prompt = f"""
-        As an expert Content Strategist, analyze the following article text.
-        Identify significant "content gaps" like missing sub-topics, unanswered questions, or areas lacking depth.
+        search_results_str = "\n\n".join([f"Title: {a['title']}\nSnippet: {a['snippet']}" for a in articles])
+
+        template_string = """
+        As an expert Content Strategist, analyze the following collection of search results (titles and snippets).
+        Your goal is to identify significant "content gaps" like missing sub-topics, unanswered questions, or areas lacking depth across all of these results.
+        Do NOT just summarize the content. Find what is missing from the collective knowledge presented here.
         Present your findings as a JSON object with a "summary" and a list of "gaps".
 
-        Article Text:
+        Search Results:
         ---
-        {article_text[:8000]}
+        {search_results}
         ---
         """
+        
+        prompt_template = PromptTemplate(
+            template=template_string,
+            input_variables=['search_results']
+        )
+        
+        final_prompt = prompt_template.format(search_results=search_results_str)
+
         try:
-            response = self.llm_model.generate_content(prompt)
-            json_str = response.text.strip().lstrip('```json').rstrip('```').strip()
-            return json.loads(json_str)
+            response = self.llm_client.chat.completions.create(
+                messages=[{"role": "user", "content": final_prompt}],
+                model=self.LLM_MODEL_NAME
+            )
+            
+            raw_response_content = response.choices[0].message.content
+            print("--- Raw LLM Response ---")
+            print(raw_response_content)
+            print("-------------------------")
+            
+            json_match = re.search(r'```json\n(.*?)\n```', raw_response_content, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1).strip()
+                return json.loads(json_str)
+            else:
+                return {"error": "LLM response did not contain a valid JSON block."}
+
         except Exception as e:
             return {"error": f"LLM analysis failed: {e}"}
 
     def present_topics_for_selection(self, topics: List[Dict]) -> Optional[Dict]:
-        """Displays a list of topics and prompts the user to choose one."""
         if not topics:
             print("No topics found to select from.")
             return None
@@ -103,17 +121,13 @@ class ContentGapAgent:
 
     def analyze_topic(self, topic: Dict) -> Dict:
         """
-        The main execution method. It routes the topic to the correct internal tool
+        The main execution method. It uses the new collective analysis tool
         to produce a final analysis report.
         """
         print(f"\nAnalyzing chosen topic: '{topic['title']}'")
         
-        if "reddit.com" in topic['url']:
+        articles = self._find_related_articles(query=topic['title'])
+        if not articles:
+            return {"error": "Could not find any related articles to analyze."}
             
-            article_url = self._find_related_article(query=topic['title'])
-            if not article_url:
-                return {"error": "Could not find a related article to analyze."}
-            return self._analyze_gaps_in_article(url=article_url)
-        else:
-            
-            return self._analyze_gaps_in_article(url=topic['url'])
+        return self._analyze_collective_gaps(articles=articles)
