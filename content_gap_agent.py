@@ -12,7 +12,7 @@ class ContentGapAgent:
     A self-contained agent to analyze topics. It handles user selection,
     finds related articles for discussion threads, and analyzes content for gaps.
     """
-    LLM_MODEL_NAME = 'gemini-2.5-pro'
+    LLM_MODEL_NAME = 'gemini-1.5-pro-latest'
 
     def __init__(self):
         load_dotenv()
