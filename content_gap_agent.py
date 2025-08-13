@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 import trafilatura
 import google.generativeai as genai
 from googleapiclient.discovery import build
@@ -16,7 +17,7 @@ class ContentGapAgent:
     def __init__(self):
         load_dotenv()
         gemini_api_key = os.getenv("GEMINI_API_KEY")
-        self.search_api_key = os.getenv("Search_API_KEY")
+        self.search_api_key = os.getenv("SEARCH_API_KEY")
         self.search_engine_id = os.getenv("SEARCH_ENGINE_ID")
 
         if not all([gemini_api_key, self.search_api_key, self.search_engine_id]):
@@ -27,7 +28,7 @@ class ContentGapAgent:
         self.user_agent = 'BloggerAI_Analyst/2.0'
 
     def _find_related_article(self, query: str) -> Optional[str]:
-        """[Internal Tool] Uses Google Search to find the top article for a query."""
+        """Uses Google Search to find the top article for a query."""
         print(f"\nSearching for an article related to: '{query}'...")
         try:
             service = build("customsearch", "v1", developerKey=self.search_api_key)
@@ -44,16 +45,24 @@ class ContentGapAgent:
             return None
 
     def _analyze_gaps_in_article(self, url: str) -> Dict:
-        """[Internal Tool] Fetches an article URL and analyzes it for content gaps."""
+        """Fetches an article URL and analyzes it for content gaps."""
         print(f"Analyzing article for gaps: {url}")
         
-        downloaded = trafilatura.fetch_url(url)
-        if not downloaded:
-            return {"error": "Failed to download article."}
-        article_text = trafilatura.extract(downloaded)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            response.raise_for_status()
+            html_content = response.text
+        except requests.RequestException as e:
+            return {"error": f"Failed to download article: {e}"}
+        
+        article_text = trafilatura.extract(html_content)
         if not article_text:
-            return {"error": "Failed to extract main text from article."}
-
+            return {"error": "Downloaded page, but could not extract a main article (website might be heavily reliant on JavaScript)."}
+        
         prompt = f"""
         As an expert Content Strategist, analyze the following article text.
         Identify significant "content gaps" like missing sub-topics, unanswered questions, or areas lacking depth.
@@ -98,13 +107,13 @@ class ContentGapAgent:
         to produce a final analysis report.
         """
         print(f"\nAnalyzing chosen topic: '{topic['title']}'")
-        # This is the new logic that works without the is_self_post flag.
+        
         if "reddit.com" in topic['url']:
-            # Assumes a URL containing "reddit.com" is a discussion thread.
+            
             article_url = self._find_related_article(query=topic['title'])
             if not article_url:
                 return {"error": "Could not find a related article to analyze."}
             return self._analyze_gaps_in_article(url=article_url)
         else:
-            # Assumes any other URL is a direct article link.
+            
             return self._analyze_gaps_in_article(url=topic['url'])

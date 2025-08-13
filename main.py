@@ -1,37 +1,45 @@
 import json
 from topic_search_agent import TopicSearchAgent
 from content_gap_agent import ContentGapAgent
+from outline_agent import OutlineAgent
 
 if __name__ == '__main__':
-    # --- PREREQUISITES ---
-    # 1. pip install --upgrade google-api-python-client google-generativeai trafilatura requests python-dotenv
-    # 2. Create your .env file with the 3 required API keys.
-    
-    # STAGE 1: DISCOVERY (The Scout Agent)
-    print("--- Running Topic Search Agent ---")
-    topic_scout = TopicSearchAgent()
-    potential_topics = topic_scout.fetch_trending_topics()
-
-    # STAGE 2: ANALYSIS (The Analyst Agent)
-    if potential_topics:
-        try:
-            # Initialize the analyst agent. It will automatically load keys from .env
-            gap_analyst = ContentGapAgent()
-
-            # The analyst presents topics to you for a decision
-            chosen_topic = gap_analyst.present_topics_for_selection(potential_topics)
-
-            # The main workflow continues only if a valid topic was chosen
-            if chosen_topic:
-                final_report = gap_analyst.analyze_topic(chosen_topic)
-                
-                print("\n--- FINAL ANALYSIS REPORT ---")
-                # Use dumps for pretty printing the final JSON
-                print(json.dumps(final_report, indent=2))
+    try:
+        # STAGE 1: DISCOVERY (The Scout)
+        print("--- Running Topic Search Agent ---")
+        topic_scout = TopicSearchAgent()
+        potential_topics = topic_scout.fetch_trending_topics()
         
-        except ValueError as e:
-            # This will catch the error if API keys are missing in .env
-            print(f"Initialization Error: {e}")
+        if not potential_topics:
+            print("Topic Search Agent did not find any topics.")
+        else:
+            # Initialize the next two agents
+            gap_analyst = ContentGapAgent()
+            outline_creator = OutlineAgent()
             
-    else:
-        print("Topic Search Agent did not find any topics.")
+            # STAGE 2: SELECTION & ANALYSIS (The Analyst)
+            chosen_topic = gap_analyst.present_topics_for_selection(potential_topics)
+            
+            if chosen_topic:
+                analysis_report = gap_analyst.analyze_topic(chosen_topic)
+                print("\n--- GAP ANALYSIS REPORT ---")
+                print(json.dumps(analysis_report, indent=2))
+                
+                # Continue only if the analysis was successful
+                if "error" not in analysis_report:
+                    
+                    # STAGE 3: OUTLINE (The Architect)
+                    print("\n--- Handing report to Outline Agent ---")
+                    blog_outline = outline_creator.create_outline(
+                        topic_title=chosen_topic['title'],
+                        gap_report=analysis_report
+                    )
+                    
+                    print("\n--- FINAL GENERATED BLOG OUTLINE ---")
+                    print(blog_outline)
+
+    except ValueError as e:
+        # This will catch the error if API keys are missing in .env
+        print(f"Initialization Error: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")

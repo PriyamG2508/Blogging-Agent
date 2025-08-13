@@ -9,10 +9,10 @@ class TopicSearchAgent:
         self.user_agent = 'BloggerAI/1.0'
         
         self.weights = {
-            'engagement': 0.4,    # Reddit score + comments
-            'quality': 0.3,       # Upvote ratio
-            'freshness': 0.2,     # How recent the post is
-            'discussion': 0.1     # Comment-to-score ratio
+            'engagement': 0.4,   
+            'quality': 0.3,       
+            'freshness': 0.2,     
+            'discussion': 0.1     
         }
 
     def calculate_topic_score(self, topic: Dict) -> float:
@@ -34,7 +34,7 @@ class TopicSearchAgent:
             
         if topic['score'] > 0:
             discussion_ratio = topic['num_comments'] / topic['score']
-            discussion_score = min(discussion_ratio / 0.5, 1.0)  # Normalize
+            discussion_score = min(discussion_ratio / 0.5, 1.0)  
         else:
             discussion_score = 0.0
         
@@ -102,5 +102,5 @@ class TopicSearchAgent:
         """Filter topics above a minimum quality threshold"""
         all_topics = self.fetch_trending_topics()
         return [topic for topic in all_topics if topic['blog_score'] >= min_score]
-
+    
     
