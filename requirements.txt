@@ -6,3 +6,4 @@ pathlib==1.0.1
 typing-extensions==4.12.2
 langchain-core==0.2.38
 langchain-community==0.2.16
+textstat==0.7.3

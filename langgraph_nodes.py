@@ -1,9 +1,11 @@
+# langgraph_nodes.py
 from typing import Dict, Any
 from state_schema import BlogGenerationState
 from topic_search_agent import TopicSearchAgent
 from content_gap_agent import ContentGapAgent
 from writing_agent import WritingAgent
 from outline_agent import OutlineAgent
+from seo_agent import SEOAgent # Import the new agent
 
 class LangGraphNodes:
     """Contains all node functions for the LangGraph workflow"""
@@ -13,6 +15,7 @@ class LangGraphNodes:
         self.gap_agent = ContentGapAgent()
         self.outline_agent = OutlineAgent()
         self.writing_agent = WritingAgent()
+        self.seo_agent = SEOAgent() # Instantiate the new agent
 
     def topic_search_node(self, state: BlogGenerationState) -> BlogGenerationState:
         """Node 1: Search and rank trending topics"""
@@ -56,13 +59,34 @@ class LangGraphNodes:
                 print("Blog outline generated successfully")
         return state
 
-    def writing_node(self, state: BlogGenerationState) -> dict:
-        """Node 5: Generate the final blog post from the outline."""
+    def writing_node(self, state: dict) -> dict:
+        """Node 5: Generate the first draft from the outline."""
         print("\nWriting Agent Phase")
         outline = state.get('blog_outline')
         if outline:
-            final_article = self.writing_agent.write_article(outline)
+            first_draft = self.writing_agent.write_article(outline)
+            if first_draft:
+                state['first_draft'] = first_draft # Save as first_draft
+                print("First draft generated successfully.")
+        return state
+
+    def seo_optimization_node(self, state: BlogGenerationState) -> BlogGenerationState:
+        """Node 6: Analyze and rewrite the article for SEO."""
+        print("\nSEO Optimization Phase")
+        first_draft = state.get('first_draft')
+        topic_title = state.get('topic_title')
+
+        if first_draft and topic_title:
+            # Simple keyword extraction from the title for analysis
+            keywords = [word for word in topic_title.split() if len(word) > 4]
+
+            # 1. Run the inspector
+            seo_report = self.seo_agent.inspector(first_draft, keywords)
+            state['seo_report'] = seo_report
+
+            # 2. Rewrite the article based on the report
+            final_article = self.seo_agent.rewrite_article(first_draft, seo_report)
             if final_article:
                 state['final_article'] = final_article
-                print("Final article generated successfully.")
+                print("SEO-optimized article generated successfully.")
         return state

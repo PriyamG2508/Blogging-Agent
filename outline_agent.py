@@ -1,22 +1,26 @@
+# outline_agent.py
+
 import json
-import os 
+import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from groq import Groq # Import Groq
 from langchain.prompts import PromptTemplate
 
 class OutlineAgent:
     """
-    A agent to to generate outline from the analysed gaps,
-    It handles outline generation of the content gap analysed.
+    An agent to generate an outline from the analyzed gaps.
+    This version uses the Groq API for more reliable content generation.
     """
-    LLM_MODEL_NAME = 'gemini-2.5-pro'
     
     def __init__(self):
         load_dotenv()
-        gemini_api_key = os.getenv("GEMINI_API_KEY")
-        
-        genai.configure(api_key=gemini_api_key)
-        self.llm_model = genai.GenerativeModel(self.LLM_MODEL_NAME)
+        # Use the Groq API Key
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            raise ValueError("GROQ_API_KEY not found in .env file.")
+            
+        # Initialize the Groq client
+        self.client = Groq(api_key=groq_api_key)
         self.user_agent = 'BloggerAI_Architect/3.0'
         
     def create_outline(self, topic_title:str, gap_report:dict) -> str:
@@ -24,6 +28,7 @@ class OutlineAgent:
         template_string = """
             You are an expert content strategist and senior blog editor, renowned for creating content that is comprehensive, engaging, and ranks highly on search engines.
             Your task is to create a detailed blog post outline. You will be working with the original topic title and a JSON analysis report that identifies specific content gaps in a competitor's article.
+            
             Original Topic: "{topic_title}"
 
             Gap Analysis Report:
@@ -40,19 +45,26 @@ class OutlineAgent:
             5.  **Logical Flow:** Organize the sections in a logical narrative that guides the reader from the basic concepts to the deeper, more insightful analysis that fills the identified gaps.
             6.  **Conclusion:** Plan a concluding section that summarizes the key takeaways and offers a final, forward-looking thought on the topic.
 
-            Now, generate the complete blog post outline.
+            Now, generate the complete blog post outline. Start directly with the H1 title. Do not add any commentary before or after the outline.
         """
-        safety_settings = {
-            'HARM_CATEGORY_HARASSMENT': 'BLOCK_NONE',
-            'HARM_CATEGORY_HATE_SPEECH': 'BLOCK_NONE',
-            'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'BLOCK_NONE',
-            'HARM_CATEGORY_DANGEROUS_CONTENT': 'BLOCK_NONE',
-        }
         
         prompt_template = PromptTemplate(template=template_string, input_variables=['topic_title', 'gap_report'])
         report_string = json.dumps(gap_report, indent=2)
         final_prompt = prompt_template.format(topic_title=topic_title, gap_report=report_string)
         
-        response = self.llm_model.generate_content(final_prompt,safety_settings=safety_settings)
-        
-        return response.text
+        try:
+            # Use the Groq client to generate the outline
+            response = self.client.chat.completions.create(
+                messages=[{"role": "user", "content": final_prompt}],
+                model="llama3-8b-8192" 
+            )
+
+            if response.choices and response.choices[0].message.content:
+                return response.choices[0].message.content
+            else:
+                print("❌ OUTLINE AGENT FAILED: Groq API returned an empty response.")
+                return ""
+
+        except Exception as e:
+            print(f"❌ An exception occurred in the Groq Outline Agent: {e}")
+            return ""
