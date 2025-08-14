@@ -50,7 +50,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 font-serif leading-tight">
-              From Research to Ranking <span className="text-blue-600"><br>in 10 Minutes</span>
+              From Research to Ranking <span className="text-blue-600">in 10 Minutes</span>
             </h1>
             <p className="text-xl text-slate-600 mb-10 max-w-4xl mx-auto leading-relaxed">
               The world class autonomous AI content agent that researches viral topics, analyzes top competitors, 
