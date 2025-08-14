@@ -41,7 +41,7 @@ async def get_topics():
     topics = topic_agent.get_top_topics(limit=12)
     frontend_topics = [
         {
-            "id": str(uuid.uuid4()),
+            "id": topic.get('id'), 
             "title": topic.get('title'),
             "subreddit": topic.get('subreddit'),
             "score": topic.get('score', 0),
