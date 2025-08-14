@@ -54,8 +54,7 @@ export default function GeneratePage() {
   const fetchTopics = async () => {
     try {
       setLoading(true)
-      // Make a real API call to your FastAPI backend
-      const response = await fetch("http://localhost:8000/api/topics")
+      ws.current = new WebSocket("wss://blogging-agent-backend.onrender.com/ws/generate");
       if (!response.ok) {
         throw new Error("Failed to fetch topics from backend.")
       }
@@ -75,8 +74,7 @@ export default function GeneratePage() {
     setAppState("generating")
     setErrorMessage("") // Clear previous errors
 
-    // Establish WebSocket connection
-    ws.current = new WebSocket("ws://localhost:8000/ws/generate")
+    ws.current = new WebSocket("wss://blogging-agent-backend.onrender.com/ws/generate");
 
     ws.current.onopen = () => {
       console.log("WebSocket connected")
