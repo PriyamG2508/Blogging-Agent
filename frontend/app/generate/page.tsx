@@ -53,21 +53,23 @@ export default function GeneratePage() {
 
   const fetchTopics = async () => {
     try {
-      setLoading(true)
-      ws.current = new WebSocket("wss://blogging-agent-backend.onrender.com/ws/generate");
+      setLoading(true);
+      // CORRECT: Use fetch to get topics from your backend API.
+      const response = await fetch("https://blogging-agent-backend.onrender.com/api/topics");
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch topics from backend.")
+        throw new Error("Failed to fetch topics from backend.");
       }
-      const data = await response.json()
-      setTopics(data.topics)
+      const data = await response.json();
+      setTopics(data.topics);
     } catch (error) {
-      console.error("Failed to fetch topics:", error)
-      setAppState("error")
-      setErrorMessage("Could not connect to the backend. Please ensure it's running and refresh the page.")
+      console.error("Failed to fetch topics:", error);
+      setAppState("error");
+      setErrorMessage("Could not connect to the backend. Please ensure it's running and refresh the page.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleTopicSelect = (topic: Topic) => {
     setSelectedTopic(topic)
