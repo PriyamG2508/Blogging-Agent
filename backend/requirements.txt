@@ -12,3 +12,4 @@ uvicorn[standard]==0.29.0
 python-multipart==0.0.9
 trafilatura==1.10.0
 google-api-python-client==2.134.0
+gunicorn
