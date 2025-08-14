@@ -14,3 +14,4 @@ trafilatura==1.10.0
 google-api-python-client==2.134.0
 gunicorn
 setuptools
+praw
