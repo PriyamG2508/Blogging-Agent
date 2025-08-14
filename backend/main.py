@@ -2,7 +2,7 @@
 
 import os
 import asyncio
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, WebSocketState
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import uuid
@@ -99,7 +99,14 @@ async def generate_article_ws(websocket: WebSocket):
         print(f"Error during generation: {e}")
         await websocket.send_json({"error": str(e)})
     finally:
-        await websocket.close()
+    # Only try to close if the connection is still open
+    if websocket.client_state != WebSocketState.DISCONNECTED:
+        try:
+            await websocket.close()
+            print("WS: Connection closed gracefully.")
+        except RuntimeError:
+            # This can happen in rare race conditions, safe to ignore
+            pass
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
