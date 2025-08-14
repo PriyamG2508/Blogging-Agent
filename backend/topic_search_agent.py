@@ -88,6 +88,7 @@ class TopicSearchAgent:
 
                     # Create a dictionary compatible with your scoring function
                     post_data = {
+                        'id': post.id,
                         'title': post.title,
                         'subreddit': post.subreddit.display_name,
                         'url': post.url,
