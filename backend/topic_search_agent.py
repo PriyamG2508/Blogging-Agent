@@ -1,11 +1,31 @@
-import requests
+# priyamg2508/blogging-agent/Blogging-Agent-b024e7272bfacc65da98bb54dc5b4619c660c870/backend/topic_search_agent.py
+
+import os
 import time
 from typing import List, Dict
-from datetime import datetime
-import math
+from dotenv import load_dotenv
+import praw # Import the PRAW library
 
 class TopicSearchAgent:
+    """
+    This agent uses the official Reddit API via PRAW to find and rank trending topics,
+    retaining the original scoring logic for robust analysis.
+    """
     def __init__(self):
+        load_dotenv()
+
+        # Initialize the PRAW client with credentials from .env
+        # This is the main change for reliable data fetching.
+        try:
+            self.reddit = praw.Reddit(
+                client_id=os.getenv("REDDIT_CLIENT_ID"),
+                client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+                user_agent=os.getenv("REDDIT_USER_AGENT", "BloggerAI/1.0 by PriyamG2508"),
+            )
+        except Exception as e:
+            raise ValueError(f"Failed to initialize PRAW. Check your REDDIT .env variables. Error: {e}")
+
+        # Your original scoring weights are preserved.
         self.weights = {
             'engagement': 0.4,
             'quality': 0.3,
@@ -14,6 +34,10 @@ class TopicSearchAgent:
         }
 
     def calculate_topic_score(self, topic: Dict) -> float:
+        """
+        Calculates a composite score for topic ranking. 
+        This is your original scoring logic, now applied to data from PRAW.
+        """
         engagement_raw = topic['score'] + (topic['num_comments'] * 2)
         engagement_score = min(engagement_raw / 1000, 1.0)
         quality_score = topic['upvote_ratio']
@@ -44,56 +68,58 @@ class TopicSearchAgent:
         return round(composite_score, 3)
 
     def fetch_trending_topics(self) -> List[Dict]:
-        headers = {
-            'User-Agent': 'BloggerAI/1.0 by PriyamG2508'
-        }
-
+        """Fetches and ranks hot topics from a list of subreddits using PRAW."""
         subreddits = ['technology', 'finance', 'business', 'worldnews', 'sports']
         all_topics = []
+        seen_titles = set()
 
-        for subreddit in subreddits:
+        print("Fetching trending topics from Reddit using PRAW...")
+        for subreddit_name in subreddits:
             try:
-                url = f'https://www.reddit.com/r/{subreddit}/hot.json'
-                params = {'limit': 15}
-                response = requests.get(url, headers=headers, params=params)
+                subreddit = self.reddit.subreddit(subreddit_name)
+                # Fetch top 15 hot posts, skipping stickied posts
+                for post in subreddit.hot(limit=15):
+                    if post.stickied or post.title in seen_titles:
+                        continue
+                    
+                    seen_titles.add(post.title)
+                    
+                    freshness_hours = (time.time() - post.created_utc) / 3600
 
-                if response.status_code == 200:
-                    data = response.json()
-                    for post in data['data']['children']:
-                        post_data = post['data']
-                        freshness_hours = (time.time() - post_data['created_utc']) / 3600
-
-                        topic = {
-                            'title': post_data['title'],
-                            'subreddit': subreddit,
-                            'url': post_data['url'] if not post_data['is_self'] else f"https://reddit.com{post_data['permalink']}",
-                            'is_self_post': post_data['is_self'],
-                            'created_utc': post_data['created_utc'],
-                            'freshness': freshness_hours,
-                            'score': post_data['score'],
-                            'num_comments': post_data['num_comments'],
-                            'upvote_ratio': post_data['upvote_ratio']
-                        }
-
-                        topic['blog_score'] = self.calculate_topic_score(topic)
-                        all_topics.append(topic)
-                else:
-                    # In a production environment, you might want to log this error.
-                    pass
-
-                time.sleep(1)
+                    # Create a dictionary compatible with your scoring function
+                    post_data = {
+                        'title': post.title,
+                        'subreddit': post.subreddit.display_name,
+                        'url': post.url,
+                        'is_self_post': post.is_self,
+                        'created_utc': post.created_utc,
+                        'freshness': freshness_hours,
+                        'score': post.score,
+                        'num_comments': post.num_comments,
+                        'upvote_ratio': post.upvote_ratio
+                    }
+                    
+                    # Calculate the score using your logic
+                    blog_score = self.calculate_topic_score(post_data)
+                    post_data['blog_score'] = blog_score
+                    
+                    all_topics.append(post_data)
+            
             except Exception as e:
-                # In a production environment, you might want to log this exception.
-                pass
+                print(f"Could not fetch topics from r/{subreddit_name}: {e}")
 
+        # Sort by your custom score to find the best topics
         all_topics.sort(key=lambda x: x['blog_score'], reverse=True)
-
+        
+        print(f"Successfully fetched and ranked {len(all_topics)} unique topics.")
         return all_topics
 
     def get_top_topics(self, limit: int = 10) -> List[Dict]:
+        """Gets the top N ranked topics."""
         all_topics = self.fetch_trending_topics()
         return all_topics[:limit]
 
     def filter_quality_topics(self, min_score: float = 0.5) -> List[Dict]:
+        """Filter topics above a minimum quality threshold."""
         all_topics = self.fetch_trending_topics()
         return [topic for topic in all_topics if topic['blog_score'] >= min_score]
