@@ -152,7 +152,7 @@ export default function GeneratePage() {
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold text-black font-serif">BloggerAI Agent Workspace</h1>
+          <h1 className="text-2xl font-bold text-black font-serif">BloggerAI <span className="text-blue-600">Agent Workspace</span></h1>
         </div>
       </div>
 
