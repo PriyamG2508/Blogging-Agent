@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { MessageSquare, TrendingUp, Copy, Download, RotateCcw } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 
+// Interface for the topic data structure
 interface Topic {
   id: string
   title: string
@@ -15,8 +16,10 @@ interface Topic {
   num_comments: number
 }
 
-type AppState = "topic-selection" | "generating" | "article-ready"
+// Type for the application's state machine
+type AppState = "topic-selection" | "generating" | "article-ready" | "error"
 
+// Interface for generation progress steps
 interface GenerationStep {
   text: string
   progress: number
@@ -29,137 +32,95 @@ export default function GeneratePage() {
   const [currentStep, setCurrentStep] = useState<GenerationStep>({ text: "", progress: 0 })
   const [finalArticle, setFinalArticle] = useState<string>("")
   const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string>("")
+  
+  // Use a ref for the WebSocket to persist across re-renders
+  const ws = useRef<WebSocket | null>(null)
 
-  const generationSteps: GenerationStep[] = [
-    { text: "Analyzing content gaps...", progress: 25 },
-    { text: "Generating strategic outline...", progress: 50 },
-    { text: "Writing first draft...", progress: 75 },
-    { text: "Optimizing for SEO & finalizing...", progress: 100 },
-  ]
-
-  // Fetch topics on component mount
+  // Fetch topics from the backend when the component mounts
   useEffect(() => {
     fetchTopics()
+  }, [])
+  
+  // Cleanup WebSocket connection on component unmount
+  useEffect(() => {
+    return () => {
+      if (ws.current) {
+        ws.current.close()
+      }
+    }
   }, [])
 
   const fetchTopics = async () => {
     try {
       setLoading(true)
-      // Mock API call - replace with actual endpoint
-      const mockTopics: Topic[] = [
-        {
-          id: "1",
-          title: "The Future of AI in Web Development: What Developers Need to Know",
-          subreddit: "webdev",
-          score: 1247,
-          num_comments: 89,
-        },
-        {
-          id: "2",
-          title: "Why TypeScript is Becoming the Standard for Large-Scale Applications",
-          subreddit: "typescript",
-          score: 892,
-          num_comments: 156,
-        },
-        {
-          id: "3",
-          title: "Next.js 15: Revolutionary Changes That Will Transform React Development",
-          subreddit: "nextjs",
-          score: 2103,
-          num_comments: 234,
-        },
-        {
-          id: "4",
-          title: "The Rise of Edge Computing: How It's Changing Cloud Architecture",
-          subreddit: "cloudcomputing",
-          score: 756,
-          num_comments: 67,
-        },
-        {
-          id: "5",
-          title: "Sustainable Software Development: Green Coding Practices for 2024",
-          subreddit: "programming",
-          score: 1456,
-          num_comments: 198,
-        },
-        {
-          id: "6",
-          title: "Cybersecurity Trends: Protecting Applications in the AI Era",
-          subreddit: "cybersecurity",
-          score: 934,
-          num_comments: 112,
-        },
-      ]
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setTopics(mockTopics)
+      // Make a real API call to your FastAPI backend
+      const response = await fetch("http://localhost:8000/api/topics")
+      if (!response.ok) {
+        throw new Error("Failed to fetch topics from backend.")
+      }
+      const data = await response.json()
+      setTopics(data.topics)
     } catch (error) {
       console.error("Failed to fetch topics:", error)
+      setAppState("error")
+      setErrorMessage("Could not connect to the backend. Please ensure it's running and refresh the page.")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleTopicSelect = async (topic: Topic) => {
+  const handleTopicSelect = (topic: Topic) => {
     setSelectedTopic(topic)
     setAppState("generating")
+    setErrorMessage("") // Clear previous errors
 
-    // Simulate the generation process
-    for (let i = 0; i < generationSteps.length; i++) {
-      setCurrentStep(generationSteps[i])
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+    // Establish WebSocket connection
+    ws.current = new WebSocket("ws://localhost:8000/ws/generate")
+
+    ws.current.onopen = () => {
+      console.log("WebSocket connected")
+      // Send the selected topic to the backend
+      ws.current?.send(JSON.stringify(topic))
     }
 
-    // Mock final article
-    const mockArticle = `# ${topic.title}
+    ws.current.onmessage = (event) => {
+      const data = JSON.parse(event.data)
 
-## Introduction
+      if (data.error) {
+        console.error("Error from backend:", data.error)
+        setErrorMessage(data.error)
+        setAppState("error")
+        ws.current?.close()
+        return
+      }
+      
+      // Update progress
+      setCurrentStep({ text: data.text, progress: data.progress })
 
-In today's rapidly evolving technological landscape, understanding the implications and opportunities presented by emerging trends has become crucial for professionals across all industries. This comprehensive analysis explores the key factors driving change and provides actionable insights for navigating the future.
+      // If the article is ready, set it and change state
+      if (data.article) {
+        setFinalArticle(data.article)
+        setAppState("article-ready")
+        ws.current?.close()
+      }
+    }
 
-## Key Insights
-
-### 1. Market Dynamics
-The current market shows unprecedented growth in adoption rates, with early indicators suggesting a fundamental shift in how businesses approach technology integration.
-
-### 2. Technical Considerations
-From an implementation perspective, several critical factors must be considered:
-- **Scalability**: Ensuring solutions can grow with demand
-- **Security**: Maintaining robust protection against emerging threats  
-- **Performance**: Optimizing for speed and efficiency
-- **Maintainability**: Building sustainable, long-term solutions
-
-### 3. Industry Impact
-The ripple effects across different sectors demonstrate the far-reaching implications of these technological advances.
-
-## Best Practices
-
-1. **Stay Informed**: Continuously monitor industry developments
-2. **Experiment Early**: Test new technologies in controlled environments
-3. **Build Incrementally**: Implement changes gradually to minimize risk
-4. **Focus on Fundamentals**: Maintain strong foundational knowledge
-
-## Looking Forward
-
-As we move into the next phase of technological evolution, the organizations and individuals who adapt quickly while maintaining focus on core principles will be best positioned for success.
-
-## Conclusion
-
-The landscape continues to evolve at an accelerating pace. By understanding these trends and preparing accordingly, we can harness the opportunities while mitigating potential challenges.
-
----
-
-*This article was generated by BloggerAI's autonomous content creation system, optimized for SEO and reader engagement.*`
-
-    setFinalArticle(mockArticle)
-    setAppState("article-ready")
+    ws.current.onerror = (error) => {
+      console.error("WebSocket error:", error)
+      setErrorMessage("A WebSocket connection error occurred. Please check the backend console.")
+      setAppState("error")
+    }
+    
+    ws.current.onclose = () => {
+        console.log("WebSocket disconnected")
+    }
   }
 
   const handleCopyArticle = async () => {
     try {
       await navigator.clipboard.writeText(finalArticle)
-      // You could add a toast notification here
+      alert("Article copied to clipboard!")
     } catch (error) {
       console.error("Failed to copy article:", error)
     }
@@ -182,6 +143,8 @@ The landscape continues to evolve at an accelerating pace. By understanding thes
     setSelectedTopic(null)
     setCurrentStep({ text: "", progress: 0 })
     setFinalArticle("")
+    setErrorMessage("")
+    fetchTopics() // Re-fetch topics
   }
 
   return (
@@ -217,7 +180,7 @@ The landscape continues to evolve at an accelerating pace. By understanding thes
                     <CardContent className="p-6">
                       <h3 className="font-semibold text-black mb-3 line-clamp-3 leading-tight">{topic.title}</h3>
                       <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-                        <span className="bg-black text-white px-2 py-1 rounded-full">r/{topic.subreddit}</span>
+                        <span className="bg-black text-white px-2 py-1 rounded-full text-xs">r/{topic.subreddit}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm text-slate-600">
                         <div className="flex items-center space-x-1">
@@ -260,26 +223,15 @@ The landscape continues to evolve at an accelerating pace. By understanding thes
                 Article Generated <span className="text-blue-600">Successfully!</span>
               </h2>
               <div className="flex flex-wrap gap-3">
-                <Button
-                  onClick={handleCopyArticle}
-                  variant="outline"
-                  className="flex items-center space-x-2 bg-transparent border-black text-black hover:bg-black hover:text-white"
-                >
+                <Button onClick={handleCopyArticle} variant="outline" className="flex items-center space-x-2">
                   <Copy className="w-4 h-4" />
                   <span>Copy Article</span>
                 </Button>
-                <Button
-                  onClick={handleDownloadMarkdown}
-                  variant="outline"
-                  className="flex items-center space-x-2 bg-transparent border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
-                >
+                <Button onClick={handleDownloadMarkdown} variant="outline" className="flex items-center space-x-2">
                   <Download className="w-4 h-4" />
                   <span>Download .md</span>
                 </Button>
-                <Button
-                  onClick={handleStartOver}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
-                >
+                <Button onClick={handleStartOver} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2">
                   <RotateCcw className="w-4 h-4" />
                   <span>Generate Another Article</span>
                 </Button>
@@ -289,35 +241,29 @@ The landscape continues to evolve at an accelerating pace. By understanding thes
             <Card className="border-slate-200">
               <CardContent className="p-8">
                 <div className="prose prose-slate max-w-none">
-                  <ReactMarkdown
-                    components={{
-                      h1: ({ children }) => (
-                        <h1 className="text-3xl font-bold text-black mb-6 font-serif">{children}</h1>
-                      ),
-                      h2: ({ children }) => (
-                        <h2 className="text-2xl font-bold text-black mt-8 mb-4 font-serif">{children}</h2>
-                      ),
-                      h3: ({ children }) => (
-                        <h3 className="text-xl font-bold text-black mt-6 mb-3 font-serif">{children}</h3>
-                      ),
-                      p: ({ children }) => <p className="text-slate-700 mb-4 leading-relaxed">{children}</p>,
-                      ul: ({ children }) => (
-                        <ul className="list-disc list-inside text-slate-700 mb-4 space-y-2">{children}</ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol className="list-decimal list-inside text-slate-700 mb-4 space-y-2">{children}</ol>
-                      ),
-                      strong: ({ children }) => <strong className="font-semibold text-black">{children}</strong>,
-                      em: ({ children }) => <em className="italic text-slate-700">{children}</em>,
-                      hr: () => <hr className="border-slate-200 my-8" />,
-                    }}
-                  >
-                    {finalArticle}
-                  </ReactMarkdown>
+                   <ReactMarkdown>{finalArticle}</ReactMarkdown>
                 </div>
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {/* Error State */}
+        {appState === "error" && (
+            <div className="max-w-2xl mx-auto text-center">
+                 <h2 className="text-2xl font-bold text-red-600 mb-4 font-serif">
+                    An Error Occurred
+                 </h2>
+                 <Card className="border-red-300 bg-red-50">
+                    <CardContent className="p-6">
+                        <p className="text-red-700">{errorMessage}</p>
+                    </CardContent>
+                 </Card>
+                 <Button onClick={handleStartOver} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2 mx-auto">
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Try Again</span>
+                </Button>
+            </div>
         )}
       </div>
     </div>
