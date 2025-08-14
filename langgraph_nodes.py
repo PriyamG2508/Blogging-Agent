@@ -50,13 +50,46 @@ class LangGraphNodes:
     def outline_generation_node(self, state: BlogGenerationState) -> BlogGenerationState:
         """Node 4: Generate blog outline from gap analysis"""
         print("\nOutline Generation Phase")
+        
+        # DEBUG: Print the entire state to see what we're working with
+        print("=== DEBUG: Current State ===")
+        print(f"topic_title: {state.get('topic_title')}")
+        print(f"gap_analysis type: {type(state.get('gap_analysis'))}")
+        if state.get('gap_analysis'):
+            print(f"gap_analysis keys: {state.get('gap_analysis').keys()}")
+        print("===========================")
+        
         topic_title = state.get('topic_title')
         gap_analysis = state.get('gap_analysis')
-        if topic_title and gap_analysis:
+        
+        if not topic_title:
+            print("❌ ERROR: topic_title is missing from state!")
+            return state
+            
+        if not gap_analysis:
+            print("❌ ERROR: gap_analysis is missing from state!")
+            return state
+            
+        print(f"✓ Calling outline_agent.create_outline with:")
+        print(f"  - topic_title: {topic_title}")
+        print(f"  - gap_analysis: {gap_analysis}")
+        
+        try:
             outline = self.outline_agent.create_outline(topic_title, gap_analysis)
+            print(f"✓ Outline agent returned: {type(outline)}")
+            print(f"✓ Outline length: {len(outline) if outline else 0}")
+            
             if outline:
                 state['blog_outline'] = outline
-                print("Blog outline generated successfully")
+                print("✅ Blog outline generated successfully")
+            else:
+                print("❌ ERROR: Outline agent returned empty/None result")
+                
+        except Exception as e:
+            print(f"❌ ERROR in outline generation: {e}")
+            import traceback
+            traceback.print_exc()
+        
         return state
 
     def writing_node(self, state: dict) -> dict:
