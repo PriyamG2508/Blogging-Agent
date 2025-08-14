@@ -2,7 +2,8 @@
 
 import os
 import asyncio
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, WebSocketState
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocketState
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import uuid
