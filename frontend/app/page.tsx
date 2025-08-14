@@ -50,12 +50,19 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 font-serif leading-tight">
-              Generate SEO-Ready Blog Posts <span className="text-blue-600">in Minutes, Not Hours</span>
+              From Research to Ranking <span className="text-blue-600">in 10 Minutes</span>
             </h1>
             <p className="text-xl text-slate-600 mb-10 max-w-4xl mx-auto leading-relaxed">
-              Our autonomous AI agent discovers trending topics, analyzes content gaps, writes compelling drafts, and
-              optimizes for search engines, so you don't have to.
+              The world class autonomous AI content agent that researches viral topics, analyzes top competitors, 
+              writes publication-ready articles, and optimizes for Google—all while you sleep. No prompts. No editing. Just results.
             </p>
+            <Button
+              onClick={scrollToGenerate}
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-lg rounded-lg font-medium"
+            >
+            Try Now for Free
+          </Button>
           </div>
 
           <div className="flex justify-center mb-20">
@@ -85,10 +92,10 @@ export default function LandingPage() {
                 <div className="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-6">
                   <Eye className="w-7 h-7 text-pink-600" />
                 </div>
-                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">Our Vision</h4>
+                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">The Big Picture</h4>
                 <p className="text-slate-600 text-center leading-relaxed">
-                  To democratize high-quality content creation by making professional-grade writing accessible to
-                  everyone, regardless of their writing experience or technical background.
+                  Every business knows content drives growth, but 90% struggle with consistency. We're solving the biggest bottleneck 
+                  in digital marketing: scaling quality content production without burning out your team or budget.
                 </p>
               </CardContent>
             </Card>
@@ -98,10 +105,10 @@ export default function LandingPage() {
                 <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-6">
                   <Target className="w-7 h-7 text-green-600" />
                 </div>
-                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">Our Mission</h4>
+                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">Our Promise</h4>
                 <p className="text-slate-600 text-center leading-relaxed">
-                  To eliminate the time-consuming aspects of content research and writing while maintaining
-                  authenticity, allowing creators to focus on strategy and creativity.
+                  Replace your content team's 40-hour research-to-publish cycle with a 10-minute AI process that delivers 
+                  higher-quality, better-optimized articles that actually rank and convert.
                 </p>
               </CardContent>
             </Card>
@@ -113,8 +120,8 @@ export default function LandingPage() {
                 <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Users className="w-7 h-7 text-blue-600" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2 font-serif">1,000+</div>
-                <div className="text-slate-600">Articles Generated</div>
+                <div className="text-3xl font-bold text-slate-900 mb-2 font-serif">100+</div>
+                <div className="text-slate-600">Articles Published</div>
               </CardContent>
             </Card>
             <Card className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
@@ -142,7 +149,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-serif">Your Content on Autopilot</h2>
+            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-serif">Your AI Content Factory</h2>
             <p className="text-xl text-slate-600">Four simple steps to perfect content</p>
           </div>
 
@@ -157,10 +164,10 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Discover Trends</h3>
+                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Trend Intelligence Engine</h3>
                     <p className="text-slate-600 leading-relaxed">
-                      Our agent scans the web for hot topics with high engagement, so you always write about what's
-                      relevant now.
+                      Continuously monitors data sources including social signals, news cycles, and search volume spikes 
+                      to identify topics gaining momentum before competitors notice them.
                     </p>
                   </div>
                 </div>
@@ -177,10 +184,10 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Find the Gaps</h3>
+                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Competitive Gap Analysis</h3>
                     <p className="text-slate-600 leading-relaxed">
-                      It analyzes top-ranking articles to find unanswered questions and missed opportunities, ensuring
-                      your content is unique.
+                      Deep-analyzes top-ranking articles to identify missing angles, unanswered questions, and content gaps 
+                      that present immediate ranking opportunities in your niche.
                     </p>
                   </div>
                 </div>
@@ -197,9 +204,10 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Write the Draft</h3>
+                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Expert-Level Writing</h3>
                     <p className="text-slate-600 leading-relaxed">
-                      A world-class writing model crafts a complete, high-quality article based on a strategic outline.
+                      Advanced language models trained on high-performing content create publication-ready articles 
+                      with perfect structure, engaging hooks, and compelling calls-to-action.
                     </p>
                   </div>
                 </div>
@@ -216,9 +224,10 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Optimize & Polish</h3>
+                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">SEO Optimization Suite</h3>
                     <p className="text-slate-600 leading-relaxed">
-                      Finally, the draft is rewritten to meet technical SEO requirements for maximum visibility.
+                      Automatically optimizes titles, meta descriptions, headers, and keyword density while ensuring 
+                      perfect readability scores and technical SEO compliance for maximum visibility.
                     </p>
                   </div>
                 </div>
@@ -231,18 +240,12 @@ export default function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-slate-900 mb-6 font-serif">
-            Ready to Transform Your Content Creation?
+            Stop Competing on Content Volume. Start Dominating on Intelligence.
           </h2>
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-            Join content creators who are already saving hours every week with AI-powered blog generation.
+            Join businesses already using AI to publish more strategic, higher-performing content 
+            than their competitors can manually produce.
           </p>
-          <Button
-            onClick={scrollToGenerate}
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-lg rounded-lg font-medium"
-          >
-            Try Now for Free
-          </Button>
         </div>
       </section>
 
@@ -300,7 +303,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-slate-800 mt-8 pt-8 text-center">
-            <p className="text-sm text-slate-400">© 2024 BloggerAI. All rights reserved.</p>
+            <p className="text-sm text-slate-400">© 2025 BloggerAI (Priyam Gupta). All rights reserved.</p>
           </div>
         </div>
       </footer>
