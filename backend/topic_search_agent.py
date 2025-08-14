@@ -45,7 +45,7 @@ class TopicSearchAgent:
 
     def fetch_trending_topics(self) -> List[Dict]:
         headers = {
-            'User-Agent': 'BloggerAI/1.0'
+            'User-Agent': 'BloggerAI/1.0 by PriyamG2508'
         }
 
         subreddits = ['technology', 'finance', 'business', 'worldnews', 'sports']
