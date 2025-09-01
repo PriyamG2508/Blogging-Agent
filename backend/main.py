@@ -27,7 +27,7 @@ app = FastAPI()
 # --- CORS Middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://bloggingagent-ai.vercel.app"],
+    allow_origins=["http://localhost:3000", "https://blogging-agent-silk.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
