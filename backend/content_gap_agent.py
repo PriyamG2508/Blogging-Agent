@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 from langchain.prompts import PromptTemplate
 
 class ContentGapAgent:
-    LLM_MODEL_NAME = 'llama3-8b-8192'
+    LLM_MODEL_NAME = 'llama-3.1-8b-instant'  
 
     def __init__(self):
         load_dotenv()
