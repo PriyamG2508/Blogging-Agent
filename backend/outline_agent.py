@@ -56,7 +56,7 @@ class OutlineAgent:
         try:
             response = self.client.chat.completions.create(
                 messages=[{"role": "user", "content": final_prompt}],
-                model="llama3-8b-8192"
+                model="llama-3.1-8b-instant"
             )
 
             if response.choices and response.choices[0].message.content:
