@@ -94,7 +94,7 @@ export default function ContactPage() {
                   <MessageSquare className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-4 font-serif">Live Chat</h3>
-                <p className="text-slate-600 mb-4">Chat with our support team in real-time.</p>
+                <p className="text-slate-600 mb-4">Chat with our support team in realtime.</p>
                 <Button className="bg-green-600 hover:bg-green-700">Coming Soon</Button>
               </CardContent>
             </Card>

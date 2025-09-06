@@ -54,7 +54,7 @@ export default function GeneratePage() {
   const fetchTopics = async () => {
     try {
       setLoading(true);
-      // CORRECT: Use fetch to get topics from your backend API.
+      // Use fetch to get topics from your backend API.
       const response = await fetch("https://blogging-agent-backend.onrender.com/api/topics");
       
       if (!response.ok) {
@@ -74,7 +74,7 @@ export default function GeneratePage() {
   const handleTopicSelect = (topic: Topic) => {
     setSelectedTopic(topic)
     setAppState("generating")
-    setErrorMessage("") // Clear previous errors
+    setErrorMessage("") 
 
     ws.current = new WebSocket("wss://blogging-agent-backend.onrender.com/ws/generate");
     
@@ -144,7 +144,7 @@ export default function GeneratePage() {
     setCurrentStep({ text: "", progress: 0 })
     setFinalArticle("")
     setErrorMessage("")
-    fetchTopics() // Re-fetch topics
+    fetchTopics() 
   }
 
   return (
@@ -180,7 +180,7 @@ export default function GeneratePage() {
                     <CardContent className="p-6">
                       <h3 className="font-semibold text-black mb-3 line-clamp-3 leading-tight">{topic.title}</h3>
                       <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-                        <span className="bg-green-800 text-white px-2 py-1 rounded-full text-xs">r/{topic.subreddit}</span>
+                        <span className="bg-blue-600 text-white px-2 py-1 rounded-full text-xs">r/{topic.subreddit}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm text-purple-600">
                         <div className="flex items-center space-x-1">

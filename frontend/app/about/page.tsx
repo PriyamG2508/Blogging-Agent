@@ -206,11 +206,14 @@ export default function AboutPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-slate-900 mb-12 font-serif">Built by Creators, for Creators</h2>
-          
           <Card className="border-slate-200 bg-white max-w-md mx-auto">
             <CardContent className="p-8">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">PG</span>
+              <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+                <img 
+                  src="/Team_member_1.jpeg" 
+                  alt="Priyam Gupta" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2 font-serif">Priyam Gupta</h3>
               <p className="text-blue-600 mb-4">Founder & Creator</p>
