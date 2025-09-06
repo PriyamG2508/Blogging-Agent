@@ -31,13 +31,13 @@ class OutlineAgent:
         2.  **Introduction (Hook & Promise):**
             -   Start with a powerful hook (a surprising statistic, a relatable problem, or a bold statement).
             -   Briefly touch upon the baseline information from the "summary" in the report.
-            -   Clearly promise the reader what unique insights and solutions they will gain, directly referencing the identified gaps. These insights should be verified and fact-checked.
+            -   Clearly promise the reader what unique insights and solutions they will gain, directly referencing the identified gaps.
         3.  **Body Sections (Address the Gaps):**
             -   Create a dedicated H2 or H3 for EACH gap identified in the report.
             -   The heading for each section must clearly signify that it's solving the identified gap.
             -   Under each heading, list bullet points detailing the key arguments, data points, examples, and "how-to" steps to include. This is not just a list of topics; it's a plan of attack.
         4.  **Include "Power Elements" (Placeholders):**
-            -   In at least two sections, add a placeholder like: `[Placeholder: Insert a compelling expert quote or a data point here] these data points and quotes should be fact-checked and sourced from reputable references.`
+            -   In at least two sections, add a placeholder like: `[Placeholder: Insert a compelling expert quote or a data point here] the quote or data should be relevant and factually correct.`
         5.  **Conclusion (Summarize & CTA):**
             -   Summarize the article's most critical takeaways.
             -   End with a strong, forward-looking statement or a clear Call-to-Action (CTA) for the reader.

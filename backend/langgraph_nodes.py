@@ -31,7 +31,7 @@ class LangGraphNodes:
             if gap_report and 'error' not in gap_report:
                 state['gap_analysis'] = gap_report
         return state
-    
+
     def outline_generation_node(self, state: BlogGenerationState) -> BlogGenerationState:
         topic_title = state.get('topic_title')
         gap_analysis = state.get('gap_analysis')
