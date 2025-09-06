@@ -30,6 +30,11 @@ class LangGraphNodes:
             gap_report = self.gap_agent.analyze_topic(selected_topic)
             if gap_report and 'error' not in gap_report:
                 state['gap_analysis'] = gap_report
+                
+            factual_briefing = self.gap_agent.get_factual_briefing(selected_topic['title'])
+            state['factual_briefing'] = factual_briefing
+            print(f"--- Factual Briefing ---\n{factual_briefing}\n--------------------")
+            
         return state
 
     def outline_generation_node(self, state: BlogGenerationState) -> BlogGenerationState:

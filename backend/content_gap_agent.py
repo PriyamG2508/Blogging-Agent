@@ -40,7 +40,7 @@ class ContentGapAgent:
         except Exception as e:
             # In a production environment, you might want to log this error.
             return []
-
+        
     def _analyze_collective_gaps(self, articles: List[Dict]) -> Dict:
         search_results_str = "\n\n".join([f"Title: {a['title']}\nSnippet: {a['snippet']}" for a in articles])
 
@@ -96,3 +96,42 @@ class ContentGapAgent:
             return {"error": "Could not find any related articles to analyze."}
 
         return self._analyze_collective_gaps(articles=articles)
+    
+    def get_factual_briefing(self, query: str) -> str:
+        """Performs a targeted search to get a concise, factual summary of a topic."""
+        print(f"Getting factual briefing for: {query}")
+        try:
+            service = build("customsearch", "v1", developerKey=self.search_api_key)
+            result = service.cse().list(q=f"fact check {query}", cx=self.search_engine_id, num=5).execute()
+
+            snippets = []
+            if 'items' in result and result['items']:
+                for item in result['items']:
+                    snippets.append(item.get('snippet'))
+
+            context = "\n".join(snippets)
+
+            if not context:
+                return "No factual information could be retrieved."
+
+            prompt = f"""
+            Based on the following search result snippets, provide a brief, factual summary of the topic: "{query}".
+            Focus ONLY on verifiable facts, outcomes, and key data points. Ignore opinions or speculation.
+
+            Snippets:
+            ---
+            {context}
+            ---
+
+            Concise Factual Briefing:
+            """
+
+            response = self.llm_client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model=self.LLM_MODEL_NAME
+            )
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"Error getting factual briefing: {e}")
+            return "Could not retrieve factual briefing."

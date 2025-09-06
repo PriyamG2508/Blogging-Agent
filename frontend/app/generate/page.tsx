@@ -55,7 +55,8 @@ export default function GeneratePage() {
     try {
       setLoading(true);
       // CORRECT: Use fetch to get topics from your backend API.
-      const response = await fetch("https://blogging-agent-backend.onrender.com/api/topics");
+      //const response = await fetch("https://blogging-agent-backend.onrender.com/api/topics");
+      const response = await fetch('http://localhost:8000/api/topics');
       
       if (!response.ok) {
         throw new Error("Failed to fetch topics from backend.");
@@ -76,7 +77,8 @@ export default function GeneratePage() {
     setAppState("generating")
     setErrorMessage("") // Clear previous errors
 
-    ws.current = new WebSocket("wss://blogging-agent-backend.onrender.com/ws/generate");
+    //ws.current = new WebSocket("wss://blogging-agent-backend.onrender.com/ws/generate");
+    ws.current = new WebSocket("ws://localhost:8000/ws/generate");
 
     ws.current.onopen = () => {
       console.log("WebSocket connected")

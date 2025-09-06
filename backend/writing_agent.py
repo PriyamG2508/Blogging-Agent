@@ -13,7 +13,7 @@ class WritingAgent:
 
         self.client = Groq(api_key=groq_api_key)
 
-    def write_article(self, outline: str) -> str:
+    def write_article(self, outline: str, factual_briefing: str = "") -> str:
         template_string = """
         You are a world-class blog writer and storyteller, an expert in transforming structured outlines into compelling, narrative-driven articles. Your writing is known for its clarity, authority, and engaging, conversational tone.
 
@@ -26,16 +26,19 @@ class WritingAgent:
         3.  **Elaborate with Authority:** The outline points are seeds. You must grow them. Provide rich context, explain the "why" behind the data, and use vivid analogies or real-world examples to make complex topics easy to understand.
         4.  **Adopt a Specific Voice:** Write in a clear, confident, and slightly informal voice. Imagine you're explaining this to an intelligent colleague over coffee. Use contractions naturally (e.g., "it's," "you're," "can't").
         5.  **Format for Readability:** The final output must be a finished article in Markdown format. Use headings (H2, H3) as specified in the outline. Keep paragraphs concise (2-4 sentences).
-        6.  **Execute the Placeholders:** When you encounter a placeholder like `[Placeholder: Insert a compelling expert quote or a data point here]`, you must invent a realistic and relevant quote or statistic to put in its place.
+        6.  **Execute the Placeholders with REAL DATA:** When you see a placeholder like `[Placeholder: Insert the statistic about XYZ from the briefing]`, you must find the relevant information from the **Factual Briefing** section below and integrate it skillfully into the article. **DO NOT INVENT ANY INFORMATION. If a suitable fact is not in the briefing, you must omit the specific data point or quote.**
         7.  **No Commentary:** Start directly with the H1 title from the outline. Do not include any of your own commentary, preambles, or postscripts like "Here is the article:".
 
         ---
         **THE BLUEPRINT TO TRANSFORM:**
         {outline}
         ---
+        **FACTUAL BRIEFING (Source of Truth):**
+        {factual_briefing}
+        ---
         """
-        prompt_template = PromptTemplate(template=template_string, input_variables=['outline'])
-        final_prompt = prompt_template.format(outline=outline)
+        prompt_template = PromptTemplate(template=template_string, input_variables=['outline', 'factual_briefing'])
+        final_prompt = prompt_template.format(outline=outline, factual_briefing=factual_briefing)
 
         try:
             response = self.client.chat.completions.create(

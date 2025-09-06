@@ -58,6 +58,8 @@ async def generate_article_ws(websocket: WebSocket):
     try:
         selected_topic = await websocket.receive_json()
         print(f"WS: Received topic: {selected_topic.get('title')}")
+        
+        topic_title = selected_topic.get('title', '')
 
         # --- Start the LangGraph-like Pipeline ---
 
@@ -67,10 +69,13 @@ async def generate_article_ws(websocket: WebSocket):
         if "error" in gap_report:
             raise Exception(gap_report["error"])
         await asyncio.sleep(2) # Add a 2-second delay for UX
+        
+        factual_briefing = gap_agent.get_factual_briefing(topic_title)
+        await asyncio.sleep(1) # Add a 1-second delay for UX
 
         # Step 2: Outline Generation
         await websocket.send_json({"text": "Generating strategic outline...", "progress": 50})
-        blog_outline = outline_agent.create_outline(selected_topic['title'], gap_report)
+        blog_outline = outline_agent.create_outline(topic_title, gap_report, factual_briefing)
         if not blog_outline:
             raise Exception("Failed to generate blog outline.")
         await asyncio.sleep(2) # Add a 2-second delay for UX
