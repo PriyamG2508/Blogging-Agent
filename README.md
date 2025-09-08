@@ -112,16 +112,16 @@ Blogging-Agent is an autonomous AI content creation tool that streamlines the en
 ````
 
 ├── backend/
-│   ├── blog\_generation\_graph.py
-│   ├── content\_gap\_agent.py
-│   ├── langgraph\_nodes.py
+│   ├── blog_generation_graph.py
+│   ├── content_gap_agent.py
+│   ├── langgraph_nodes.py
 │   ├── main.py
-│   ├── outline\_agent.py
+│   ├── outline_agent.py
 │   ├── requirements.txt
-│   ├── seo\_agent.py
-│   ├── state\_schema.py
-│   ├── topic\_search\_agent.py
-│   └── writing\_agent.py
+│   ├── seo_agent.py
+│   ├── state_schema.py
+│   ├── topic_search_agent.py
+│   └── writing_agent.py
 ├── frontend/
 │   ├── app/
 │   ├── components/
@@ -139,3 +139,4 @@ Contributions are welcome! Please feel free to open an issue or submit a pull re
 ## License
 
 This project is licensed under the MIT License.
+
