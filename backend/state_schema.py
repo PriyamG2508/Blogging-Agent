@@ -11,6 +11,7 @@ class BlogGenerationState(TypedDict):
     # Content Gap Agent outputs
     gap_analysis: Optional[Dict]
     related_article_url: Optional[str]
+    factual_briefing: Optional[str]
 
     # Outline Agent outputs
     blog_outline: Optional[str]

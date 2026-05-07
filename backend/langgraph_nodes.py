@@ -20,8 +20,7 @@ class LangGraphNodes:
         return state
 
     def topic_selection_node(self, state: BlogGenerationState) -> BlogGenerationState:
-        # In the FastAPI app, the topic will be passed in the initial state.
-        # This node can be adapted or bypassed depending on the final workflow.
+        # Topic is passed in from FastAPI in the initial state
         return state
 
     def content_gap_node(self, state: BlogGenerationState) -> BlogGenerationState:
@@ -30,27 +29,30 @@ class LangGraphNodes:
             gap_report = self.gap_agent.analyze_topic(selected_topic)
             if gap_report and 'error' not in gap_report:
                 state['gap_analysis'] = gap_report
-                
+
             factual_briefing = self.gap_agent.get_factual_briefing(selected_topic['title'])
             state['factual_briefing'] = factual_briefing
             print(f"--- Factual Briefing ---\n{factual_briefing}\n--------------------")
-            
+
         return state
 
     def outline_generation_node(self, state: BlogGenerationState) -> BlogGenerationState:
         topic_title = state.get('topic_title')
         gap_analysis = state.get('gap_analysis')
+        factual_briefing = state.get('factual_briefing', '')
 
         if topic_title and gap_analysis:
-            outline = self.outline_agent.create_outline(topic_title, gap_analysis)
+            outline = self.outline_agent.create_outline(topic_title, gap_analysis, factual_briefing)
             if outline:
                 state['blog_outline'] = outline
         return state
 
-    def writing_node(self, state: dict) -> dict:
+    def writing_node(self, state: BlogGenerationState) -> BlogGenerationState:
         outline = state.get('blog_outline')
+        factual_briefing = state.get('factual_briefing', '')  # ← FIX: get from state
+
         if outline:
-            first_draft = self.writing_agent.write_article(outline)
+            first_draft = self.writing_agent.write_article(outline, factual_briefing)  # ← FIX: pass it
             if first_draft:
                 state['first_draft'] = first_draft
         return state

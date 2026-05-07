@@ -1,3 +1,6 @@
+# This file is for local CLI testing only. 
+# The web application uses main.py directly.
+
 import re
 import time
 from blog_generation_graph import create_blog_generation_graph
