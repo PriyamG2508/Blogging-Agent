@@ -1,94 +1,82 @@
 "use client"
 
-import Link from "next/link"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, BarChart3, PenTool, Rocket, Users, Star, Zap, Code, Target, Eye, ArrowRight, CheckCircle, TrendingUp, Clock, Shield, Sparkles } from "lucide-react"
+import {
+  Search, BarChart3, PenTool, Rocket, Users, Star, Zap,
+  Code, Target, Eye, ArrowRight, CheckCircle
+} from "lucide-react"
+import AuthModal from "@/components/AuthModal"
+import Navbar from "@/components/Navbar"
+import Link from "next/link"
 
 export default function LandingPage() {
-  const scrollToGenerate = () => {
-    window.location.href = "/generate"
+  const router = useRouter()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // If logged in → go to /generate. If not → show auth modal
+  const handleCTA = () => {
+    if (isLoggedIn) {
+      router.push("/generate")
+    } else {
+      setShowAuthModal(true)
+    }
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Enhanced Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Code className="w-5 h-5 text-white" />
-              </div>
-              <Link href="/" className="text-xl font-bold text-slate-900 font-serif">BloggerAI</Link>
-            </div>
-            
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-slate-600 hover:text-slate-900 transition-colors">Features</Link>
-              <Link href="#how-it-works" className="text-slate-600 hover:text-slate-900 transition-colors">How It Works</Link>
-              <Link href="#pricing" className="text-slate-600 hover:text-slate-900 transition-colors">Pricing</Link>
-              <Link href="/about" className="text-slate-600 hover:text-slate-900 transition-colors">About</Link>
-            </div>
+      <Navbar />
 
-            <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button variant="outline" size="sm">Sign In</Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Dashboard
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Enhanced Hero Section */}
+      {/* Hero */}
       <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-white to-pink-50/20"></div>
-        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-100/40 rounded-full blur-3xl animate-pulse delay-700"></div>
-        
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-white to-pink-50/20" />
+        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-100/40 rounded-full blur-3xl animate-pulse delay-700" />
+
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
-
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 font-serif leading-tight">
-              From Research to Ranking<br/>
+              From Research to Ranking<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
                 in 10 Minutes
               </span>
             </h1>
             <p className="text-xl text-slate-600 mb-10 max-w-4xl mx-auto leading-relaxed">
-              The world's first autonomous AI content agent that researches viral topics, analyzes top competitors, 
+              The world's first autonomous AI content agent that researches viral topics, analyzes top competitors,
               writes publication-ready articles, and optimizes while you sleep. No prompts. No editing. Just results.
             </p>
 
-            {/* Enhanced CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button
-                onClick={scrollToGenerate}
-                size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-lg rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                Generate My First Article
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              
+              <button onClick={handleCTA}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-lg rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2">
+                <span>Generate My First Article</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
               <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-slate-300">
                 Watch 2-min Demo
               </Button>
             </div>
 
-            {/* Social Proof */}
             <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-slate-500">
               <div className="flex items-center">
                 <div className="flex -space-x-2 mr-3">
-                  <div className="w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border-2 border-white"></div>
-                  <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-white"></div>
-                  <div className="w-6 h-6 bg-gradient-to-r from-pink-400 to-red-500 rounded-full border-2 border-white"></div>
+                  {["from-blue-400 to-purple-500", "from-green-400 to-blue-500", "from-pink-400 to-red-500"].map((g, i) => (
+                    <div key={i} className={`w-6 h-6 bg-gradient-to-r ${g} rounded-full border-2 border-white`} />
+                  ))}
                 </div>
                 <span>Trusted by 500+ creators</span>
               </div>
@@ -103,45 +91,30 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Enhanced Process Flow */}
+          {/* Flow */}
           <div className="flex justify-center mb-20">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-200/50 via-blue-200/50 to-green-200/50 rounded-full blur-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-200/50 via-blue-200/50 to-green-200/50 rounded-full blur-xl" />
               <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20">
                 <div className="flex items-center space-x-6">
-                  <div className="flex flex-col items-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <Search className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="mt-3 text-center">
-                      <div className="text-sm font-semibold text-slate-800">Research</div>
-                      <div className="text-xs text-slate-500">Trending Topics</div>
-                    </div>
-                  </div>
-
-                  <div className="w-12 h-1 bg-gradient-to-r from-pink-400 to-blue-400 rounded-full"></div>
-
-                  <div className="flex flex-col items-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <BarChart3 className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="mt-3 text-center">
-                      <div className="text-sm font-semibold text-slate-800">Analyze</div>
-                      <div className="text-xs text-slate-500">Competitor Gaps</div>
-                    </div>
-                  </div>
-
-                  <div className="w-12 h-1 bg-gradient-to-r from-blue-400 to-green-400 rounded-full"></div>
-
-                  <div className="flex flex-col items-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <PenTool className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="mt-3 text-center">
-                      <div className="text-sm font-semibold text-slate-800">Generate</div>
-                      <div className="text-xs text-slate-500">SEO-Optimized</div>
-                    </div>
-                  </div>
+                  {[
+                    { Icon: Search, grad: "from-pink-500 to-pink-600", label: "Research", sub: "Trending Topics" },
+                    { Icon: BarChart3, grad: "from-blue-500 to-blue-600", label: "Analyze", sub: "Competitor Gaps" },
+                    { Icon: PenTool, grad: "from-green-500 to-green-600", label: "Generate", sub: "SEO-Optimized" },
+                  ].map(({ Icon, grad, label, sub }, i) => (
+                    <>
+                      <div key={label} className="flex flex-col items-center group">
+                        <div className={`w-16 h-16 bg-gradient-to-br ${grad} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="mt-3 text-center">
+                          <div className="text-sm font-semibold text-slate-800">{label}</div>
+                          <div className="text-xs text-slate-500">{sub}</div>
+                        </div>
+                      </div>
+                      {i < 2 && <div className={`w-12 h-1 bg-gradient-to-r ${i === 0 ? "from-pink-400 to-blue-400" : "from-blue-400 to-green-400"} rounded-full`} />}
+                    </>
+                  ))}
                 </div>
               </div>
             </div>
@@ -149,397 +122,206 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Key Benefits Section */}
+      {/* Stats */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-slate-900 mb-4 font-serif">Why Choose BloggerAI?</h3>
-            <p className="text-lg text-slate-600">Empowering content creators with intelligent automation</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <Eye className="w-7 h-7 text-pink-600" />
-                </div>
-                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">The Big Picture</h4>
-                <p className="text-slate-600 text-center leading-relaxed">
-                  Every business knows content drives growth, but 90% struggle with consistency. We're solving the biggest bottleneck 
-                  in digital marketing: scaling quality content production without burning out your team or budget.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-8">
-                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <Target className="w-7 h-7 text-green-600" />
-                </div>
-                <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">Our Promise</h4>
-                <p className="text-slate-600 text-center leading-relaxed">
-                  Replace your content team's 40-hour research-to-publish cycle with a 10-minute AI process that delivers 
-                  higher-quality, better-optimized articles that actually rank and convert.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {[
+              { Icon: Eye, color: "bg-pink-100 text-pink-600", title: "The Big Picture", desc: "Every business knows content drives growth, but 90% struggle with consistency. We're solving the biggest bottleneck in digital marketing: scaling quality content production." },
+              { Icon: Target, color: "bg-green-100 text-green-600", title: "Our Promise", desc: "Replace your team's 40-hour research-to-publish cycle with a 10-minute AI process that delivers higher-quality, better-optimized articles that actually rank and convert." },
+            ].map(({ Icon, color, title, desc }) => (
+              <Card key={title} className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
+                <CardContent className="p-8">
+                  <div className={`w-14 h-14 ${color} rounded-xl flex items-center justify-center mx-auto mb-6`}>
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-slate-900 mb-4 font-serif text-center">{title}</h4>
+                  <p className="text-slate-600 text-center leading-relaxed">{desc}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-8 text-center">
-                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-7 h-7 text-blue-600" />
-                </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2 font-serif">500+</div>
-                <div className="text-slate-600">Happy Creators</div>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-8 text-center">
-                <div className="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Star className="w-7 h-7 text-pink-600" />
-                </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2 font-serif">95%</div>
-                <div className="text-slate-600">Success Rate</div>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-8 text-center">
-                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-7 h-7 text-green-600" />
-                </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2 font-serif">3x</div>
-                <div className="text-slate-600">Faster Creation</div>
-              </CardContent>
-            </Card>
+            {[
+              { Icon: Users, color: "bg-blue-100 text-blue-600", stat: "500+", label: "Happy Creators" },
+              { Icon: Star, color: "bg-pink-100 text-pink-600", stat: "95%", label: "Success Rate" },
+              { Icon: Zap, color: "bg-green-100 text-green-600", stat: "3x", label: "Faster Creation" },
+            ].map(({ Icon, color, stat, label }) => (
+              <Card key={label} className="border-slate-200 bg-white hover:shadow-lg transition-shadow">
+                <CardContent className="p-8 text-center">
+                  <div className={`w-14 h-14 ${color} rounded-xl flex items-center justify-center mx-auto mb-4`}>
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <div className="text-3xl font-bold text-slate-900 mb-2 font-serif">{stat}</div>
+                  <div className="text-slate-600">{label}</div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features */}
       <section id="features" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 font-serif">Your AI Content Factory</h2>
             <p className="text-xl text-slate-600">Four simple steps to perfect content</p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-all p-2">
-              <CardContent className="p-8">
-                <div className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-14 h-14 bg-pink-600 rounded-xl flex items-center justify-center">
-                      <Search className="w-7 h-7 text-white" />
+            {[
+              { Icon: Search, color: "bg-pink-600", title: "Trend Intelligence Engine", desc: "Continuously monitors Reddit, news cycles, and search volume spikes to identify topics gaining momentum before competitors notice them." },
+              { Icon: BarChart3, color: "bg-blue-600", title: "Competitive Gap Analysis", desc: "Deep-analyzes top-ranking articles to identify missing angles, unanswered questions, and content gaps that present immediate ranking opportunities." },
+              { Icon: PenTool, color: "bg-green-600", title: "Expert-Level Writing", desc: "Advanced language models create publication-ready articles with perfect structure, engaging hooks, and compelling calls-to-action." },
+              { Icon: Rocket, color: "bg-blue-600", title: "SEO Optimization Suite", desc: "Automatically optimizes titles, meta descriptions, headers, and keyword density while ensuring perfect readability scores." },
+            ].map(({ Icon, color, title, desc }) => (
+              <Card key={title} className="border-slate-200 bg-white hover:shadow-lg transition-all p-2">
+                <CardContent className="p-8">
+                  <div className="flex items-start space-x-6">
+                    <div className={`flex-shrink-0 w-14 h-14 ${color} rounded-xl flex items-center justify-center`}>
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">{title}</h3>
+                      <p className="text-slate-600 leading-relaxed">{desc}</p>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Trend Intelligence Engine</h3>
-                    <p className="text-slate-600 leading-relaxed">
-                      Continuously monitors data sources including social signals, news cycles, and search volume spikes 
-                      to identify topics gaining momentum before competitors notice them.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-all p-2">
-              <CardContent className="p-8">
-                <div className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center">
-                      <BarChart3 className="w-7 h-7 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Competitive Gap Analysis</h3>
-                    <p className="text-slate-600 leading-relaxed">
-                      Deep-analyzes top-ranking articles to identify missing angles, unanswered questions, and content gaps 
-                      that present immediate ranking opportunities in your niche.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-all p-2">
-              <CardContent className="p-8">
-                <div className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center">
-                      <PenTool className="w-7 h-7 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">Expert-Level Writing</h3>
-                    <p className="text-slate-600 leading-relaxed">
-                      Advanced language models trained on high-performing content create publication-ready articles 
-                      with perfect structure, engaging hooks, and compelling calls-to-action.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 bg-white hover:shadow-lg transition-all p-2">
-              <CardContent className="p-8">
-                <div className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center">
-                      <Rocket className="w-7 h-7 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 font-serif mb-3">SEO Optimization Suite</h3>
-                    <p className="text-slate-600 leading-relaxed">
-                      Automatically optimizes titles, meta descriptions, headers, and keyword density while ensuring 
-                      perfect readability scores and technical SEO compliance for maximum visibility.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Pricing */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-slate-900 mb-4 font-serif">Simple, Transparent Pricing</h2>
             <p className="text-xl text-slate-600">Start free, scale as you grow</p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <Card className="border-slate-200 bg-white relative">
+            <Card className="border-slate-200 bg-white">
               <CardContent className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Starter</h3>
-                  <div className="text-3xl font-bold text-slate-900">$0</div>
+                  <div className="text-3xl font-bold">$0</div>
                   <div className="text-slate-500">Forever free</div>
                 </div>
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">5 articles per month</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Basic SEO optimization</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Email support</span>
-                  </li>
+                  {["5 articles per month", "Basic SEO optimization", "Email support"].map(f => (
+                    <li key={f} className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" /><span className="text-slate-600">{f}</span></li>
+                  ))}
                 </ul>
-                <Button onClick={scrollToGenerate} className="w-full bg-slate-600 hover:bg-slate-700">
+                <button onClick={handleCTA} className="w-full bg-slate-600 hover:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
                   Get Started Free
-                </Button>
+                </button>
               </CardContent>
             </Card>
 
-            {/* Pro Plan */}
-            <Card className="border-blue-200 bg-white relative shadow-lg">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <Card className="border-blue-200 bg-white shadow-lg relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">Most Popular</span>
               </div>
               <CardContent className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Professional</h3>
-                  <div className="text-3xl font-bold text-slate-900">$29</div>
+                  <div className="text-3xl font-bold">$29</div>
                   <div className="text-slate-500">per month</div>
                 </div>
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">50 articles per month</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Advanced SEO & analytics</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Priority support</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Content calendar</span>
-                  </li>
+                  {["50 articles per month", "Advanced SEO & analytics", "Priority support", "Content calendar"].map(f => (
+                    <li key={f} className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" /><span className="text-slate-600">{f}</span></li>
+                  ))}
                 </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
                   Start Free Trial
-                </Button>
+                </button>
               </CardContent>
             </Card>
 
-            {/* Enterprise Plan */}
-            <Card className="border-slate-200 bg-white relative">
+            <Card className="border-slate-200 bg-white">
               <CardContent className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Enterprise</h3>
-                  <div className="text-3xl font-bold text-slate-900">Custom</div>
+                  <div className="text-3xl font-bold">Custom</div>
                   <div className="text-slate-500">Let's talk</div>
                 </div>
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Unlimited articles</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Custom integrations</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Dedicated support</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span className="text-slate-600">Team collaboration</span>
-                  </li>
+                  {["Unlimited articles", "Custom integrations", "Dedicated support", "Team collaboration"].map(f => (
+                    <li key={f} className="flex items-center"><CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" /><span className="text-slate-600">{f}</span></li>
+                  ))}
                 </ul>
-                <Button variant="outline" className="w-full border-slate-300">
-                  Contact Sales
-                </Button>
+                <Button variant="outline" className="w-full border-slate-300">Contact Sales</Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Banner */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-purple-700">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6 font-serif">
-            Ready to Transform Your Content Strategy?
-          </h2>
+          <h2 className="text-4xl font-bold text-white mb-6 font-serif">Ready to Transform Your Content Strategy?</h2>
           <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
             Join thousands of creators who've already automated their content creation and boosted their rankings.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              onClick={scrollToGenerate}
-              size="lg" 
-              className="bg-white text-blue-600 hover:bg-blue-50 px-12 py-4 text-lg font-medium"
-            >
-              Start Creating Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </div>
+          <button onClick={handleCTA}
+            className="bg-white text-blue-600 hover:bg-blue-50 px-12 py-4 text-lg font-medium rounded-xl inline-flex items-center space-x-2 transition-colors">
+            <span>Start Creating Now</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
       </section>
 
-      {/* Enhanced Footer */}
+      {/* Footer */}
       <footer className="bg-slate-900 py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-1">
+            <div>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Code className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-white font-serif">BloggerAI</h3>
               </div>
-              <p className="text-sm text-slate-400 mb-4">Automated content generation powered by advanced AI technology.</p>
-              <div className="flex space-x-4">
-                <a href="https://x.com/_priyam_2003" className="text-slate-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                  </svg>
-                </a>
-                <a href="https://www.linkedin.com/in/priyamg2508/" className="text-slate-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                </a>
-                <a href="https://github.com/PriyamG2508" className="text-slate-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                  </svg>
-                </a>
-              </div>
+              <p className="text-sm text-slate-400">Automated content generation powered by advanced AI.</p>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#features" className="text-slate-400 hover:text-white">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#how-it-works" className="text-slate-400 hover:text-white">
-                    How It Works
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/generate" className="text-slate-400 hover:text-white">
-                    Try Now
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#pricing" className="text-slate-400 hover:text-white">
-                    Pricing
-                  </Link>
-                </li>
+                {[["#features", "Features"], ["#how-it-works", "How It Works"], ["/generate", "Try Now"], ["#pricing", "Pricing"]].map(([href, label]) => (
+                  <li key={label}><Link href={href} className="text-slate-400 hover:text-white">{label}</Link></li>
+                ))}
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/about" className="text-slate-400 hover:text-white">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="text-slate-400 hover:text-white">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="text-slate-400 hover:text-white">
-                    Contact
-                  </Link>
-                </li>
+                {[["/about", "About"], ["/contact", "Contact"]].map(([href, label]) => (
+                  <li key={label}><Link href={href} className="text-slate-400 hover:text-white">{label}</Link></li>
+                ))}
               </ul>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/help" className="text-slate-400 hover:text-white">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="text-slate-400 hover:text-white">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-slate-400 hover:text-white">
-                    Terms of Service
-                  </Link>
-                </li>
+                {[["/privacy", "Privacy Policy"], ["/terms", "Terms of Service"]].map(([href, label]) => (
+                  <li key={label}><Link href={href} className="text-slate-400 hover:text-white">{label}</Link></li>
+                ))}
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <div className="border-t border-slate-800 mt-8 pt-8 text-center">
             <p className="text-sm text-slate-400">© 2025 BloggerAI (Priyam Gupta). All rights reserved.</p>
-            <div className="flex items-center space-x-4 mt-4 md:mt-0">
-              <span className="text-sm text-slate-400">Made with</span>
-              <span className="text-red-500">♥</span>
-              <span className="text-sm text-slate-400">for content creators</span>
-            </div>
           </div>
         </div>
       </footer>
+
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   )
 }
