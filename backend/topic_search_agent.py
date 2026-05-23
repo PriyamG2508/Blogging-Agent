@@ -16,14 +16,21 @@ class TopicSearchAgent:
 
         # Initialize the PRAW client with credentials from .env
         # This is the main change for reliable data fetching.
-        try:
-            self.reddit = praw.Reddit(
-                client_id=os.getenv("REDDIT_CLIENT_ID"),
-                client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
-                user_agent=os.getenv("REDDIT_USER_AGENT", "BloggerAI/1.0 by PriyamG2508"),
-            )
-        except Exception as e:
-            raise ValueError(f"Failed to initialize PRAW. Check your REDDIT .env variables. Error: {e}")
+        client_id = os.getenv("REDDIT_CLIENT_ID")
+        client_secret = os.getenv("REDDIT_CLIENT_SECRET")
+        if not client_id or not client_secret:
+            print("WARNING: REDDIT_CLIENT_ID or REDDIT_CLIENT_SECRET not found in .env. Reddit agent will be disabled.")
+            self.reddit = None
+        else:
+            try:
+                self.reddit = praw.Reddit(
+                    client_id=client_id,
+                    client_secret=client_secret,
+                    user_agent=os.getenv("REDDIT_USER_AGENT", "BloggerAI/1.0 by PriyamG2508"),
+                )
+            except Exception as e:
+                print(f"WARNING: Failed to initialize PRAW: {e}. Reddit agent will be disabled.")
+                self.reddit = None
 
         # Your original scoring weights are preserved.
         self.weights = {
@@ -69,6 +76,8 @@ class TopicSearchAgent:
 
     def fetch_trending_topics(self) -> List[Dict]:
         """Fetches and ranks hot topics from a list of subreddits using PRAW."""
+        if not self.reddit:
+            raise ValueError("Reddit PRAW client is not initialized. Please configure REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET in your backend/.env file.")
         subreddits = ['technology', 'finance', 'business', 'worldnews', 'sports']
         all_topics = []
         seen_titles = set()

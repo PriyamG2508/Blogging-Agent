@@ -9,10 +9,16 @@ from typing import Dict, List
 class SEOAgent:
     def __init__(self):
         load_dotenv()
-        groq_api_key = os.getenv('GROQ_API_KEY')
-        if not groq_api_key:
-            raise ValueError("GROQ_API_KEY not found in .env file.")
-        self.client = Groq(api_key=groq_api_key)
+        self.groq_api_key = os.getenv('GROQ_API_KEY')
+        if not self.groq_api_key:
+            print("WARNING: GROQ_API_KEY not found in .env file. SEOAgent will fail on execution.")
+            self.client = None
+        else:
+            try:
+                self.client = Groq(api_key=self.groq_api_key)
+            except Exception as e:
+                print(f"WARNING: Failed to initialize Groq client: {e}")
+                self.client = None
 
     def inspector(self, article_text: str, keywords: List[str]) -> Dict:
         words = article_text.split()
@@ -34,6 +40,8 @@ class SEOAgent:
         return report
 
     def rewrite_article(self, first_draft: str, seo_report: Dict) -> str:
+        if not self.client:
+            return "SEOAgent is not configured. Please add GROQ_API_KEY to backend/.env."
         report_string = json.dumps(seo_report, indent=2)
 
         prompt = f"""

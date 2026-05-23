@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
@@ -102,8 +102,8 @@ export default function LandingPage() {
                     { Icon: BarChart3, grad: "from-blue-500 to-blue-600", label: "Analyze", sub: "Competitor Gaps" },
                     { Icon: PenTool, grad: "from-green-500 to-green-600", label: "Generate", sub: "SEO-Optimized" },
                   ].map(({ Icon, grad, label, sub }, i) => (
-                    <>
-                      <div key={label} className="flex flex-col items-center group">
+                    <React.Fragment key={label}>
+                      <div className="flex flex-col items-center group">
                         <div className={`w-16 h-16 bg-gradient-to-br ${grad} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                           <Icon className="w-8 h-8 text-white" />
                         </div>
@@ -113,7 +113,7 @@ export default function LandingPage() {
                         </div>
                       </div>
                       {i < 2 && <div className={`w-12 h-1 bg-gradient-to-r ${i === 0 ? "from-pink-400 to-blue-400" : "from-blue-400 to-green-400"} rounded-full`} />}
-                    </>
+                    </React.Fragment>
                   ))}
                 </div>
               </div>

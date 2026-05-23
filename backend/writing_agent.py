@@ -6,14 +6,21 @@ from langchain.prompts import PromptTemplate
 class WritingAgent:
     def __init__(self):
         load_dotenv()
-        groq_api_key = os.getenv('GROQ_API_KEY')
+        self.groq_api_key = os.getenv('GROQ_API_KEY')
 
-        if not groq_api_key:
-            raise ValueError("GROQ_API_KEY not found in .env file.")
-
-        self.client = Groq(api_key=groq_api_key)
+        if not self.groq_api_key:
+            print("WARNING: GROQ_API_KEY not found in .env file. WritingAgent will fail on execution.")
+            self.client = None
+        else:
+            try:
+                self.client = Groq(api_key=self.groq_api_key)
+            except Exception as e:
+                print(f"WARNING: Failed to initialize Groq client: {e}")
+                self.client = None
 
     def write_article(self, outline: str, factual_briefing: str = "") -> str:
+        if not self.client:
+            return "WritingAgent is not configured. Please add GROQ_API_KEY to backend/.env."
         template_string = """
         You are a world-class blog writer and storyteller, an expert in transforming structured outlines into compelling, narrative-driven articles. Your writing is known for its clarity, authority, and engaging, conversational tone.
 

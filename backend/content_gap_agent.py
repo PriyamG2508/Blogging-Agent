@@ -13,14 +13,19 @@ class ContentGapAgent:
 
     def __init__(self):
         load_dotenv()
-        groq_api_key = os.getenv("GROQ_API_KEY")
+        self.groq_api_key = os.getenv("GROQ_API_KEY")
         self.search_api_key = os.getenv("SEARCH_API_KEY")
         self.search_engine_id = os.getenv("SEARCH_ENGINE_ID")
 
-        if not all([groq_api_key, self.search_api_key, self.search_engine_id]):
-            raise ValueError("One or more API keys are missing. Please check your .env file.")
-
-        self.llm_client = Groq(api_key=groq_api_key)
+        if not all([self.groq_api_key, self.search_api_key, self.search_engine_id]):
+            print("WARNING: Missing GROQ_API_KEY, SEARCH_API_KEY, or SEARCH_ENGINE_ID in .env. ContentGapAgent will fail on execute.")
+            self.llm_client = None
+        else:
+            try:
+                self.llm_client = Groq(api_key=self.groq_api_key)
+            except Exception as e:
+                print(f"WARNING: Failed to initialize Groq client: {e}")
+                self.llm_client = None
 
     def _find_related_articles(self, query: str, num_results: int = 5) -> List[Dict]:
         try:
@@ -91,6 +96,8 @@ class ContentGapAgent:
             return {"error": f"LLM analysis failed: {e}"}
 
     def analyze_topic(self, topic: Dict) -> Dict:
+        if not self.search_api_key or not self.search_engine_id or not self.llm_client:
+            return {"error": "ContentGapAgent is not configured. Please add GROQ_API_KEY, SEARCH_API_KEY, and SEARCH_ENGINE_ID to backend/.env."}
         articles = self._find_related_articles(query=topic['title'])
         if not articles:
             return {"error": "Could not find any related articles to analyze."}
@@ -100,6 +107,8 @@ class ContentGapAgent:
     def get_factual_briefing(self, query: str) -> str:
         """Performs a targeted search to get a concise, factual summary of a topic."""
         print(f"Getting factual briefing for: {query}")
+        if not self.search_api_key or not self.search_engine_id or not self.llm_client:
+            return "ContentGapAgent is not configured. Please add SEARCH_API_KEY and SEARCH_ENGINE_ID to backend/.env."
         try:
             service = build("customsearch", "v1", developerKey=self.search_api_key)
             result = service.cse().list(q=f"fact check {query}", cx=self.search_engine_id, num=5).execute()
