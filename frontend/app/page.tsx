@@ -70,25 +70,6 @@ export default function LandingPage() {
                 Watch 2-min Demo
               </Button>
             </div>
-
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-slate-500">
-              <div className="flex items-center">
-                <div className="flex -space-x-2 mr-3">
-                  {["from-blue-400 to-purple-500", "from-green-400 to-blue-500", "from-pink-400 to-red-500"].map((g, i) => (
-                    <div key={i} className={`w-6 h-6 bg-gradient-to-r ${g} rounded-full border-2 border-white`} />
-                  ))}
-                </div>
-                <span>Trusted by 500+ creators</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-yellow-500 mr-1">★★★★★</span>
-                <span>4.9/5 rating</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-green-600 mr-1" />
-                <span>No credit card required</span>
-              </div>
-            </div>
           </div>
 
           {/* Flow */}
