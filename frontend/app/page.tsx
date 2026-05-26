@@ -244,7 +244,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Banner */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-purple-700">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-blue-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6 font-serif">Ready to Transform Your Content Strategy?</h2>
           <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
