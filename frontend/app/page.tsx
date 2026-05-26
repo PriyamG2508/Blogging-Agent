@@ -51,7 +51,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 font-serif leading-tight">
               From Research to Ranking<br />
-              <span className="text-blue-600">
+              <span className="text-blue-700">
                 in 10 Minutes
               </span>
             </h1>
@@ -244,7 +244,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Banner */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-blue-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-blue-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6 font-serif">Ready to Transform Your Content Strategy?</h2>
           <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
