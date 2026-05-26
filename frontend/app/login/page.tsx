@@ -38,7 +38,7 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.")
     } finally {
-      setLoading(false)
+      setLoading(false) 
     }
   }
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
               </div>
 
               {/* Error message */}
-              {error && (
+              {error && (7
                 <div className="flex items-start space-x-2 bg-red-50 border border-red-200 rounded-lg p-3">
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                   <p className="text-red-700 text-sm">{error}</p>

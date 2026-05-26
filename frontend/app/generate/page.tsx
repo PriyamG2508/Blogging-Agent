@@ -92,6 +92,7 @@ export default function GeneratePage() {
       ws.current?.send(JSON.stringify(topic))
     }
 
+    
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data)
 
@@ -111,6 +112,29 @@ export default function GeneratePage() {
         ws.current?.close()
       }
     }
+
+  ws.current.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+
+    if (data.error) {
+      console.error("Error from backend:", data.error)
+      setErrorMessage(data.error)
+      setAppState("error")
+      ws.current?.close()
+      return
+    }
+
+    setCurrentStep({ text: data.text, progress: data.progress })
+
+    if (data.article) {
+      setFinalArticle(data.article)
+      setAppState("article-ready")
+      ws.current?.close()
+
+      // Auto-save to database if user is logged in
+      saveArticle(topic, data.article)
+    }
+  }
 
     ws.current.onerror = (error) => {
       console.error("WebSocket error:", error)
@@ -172,6 +196,30 @@ export default function GeneratePage() {
     if (topics.length === 0) {
       fetchTopics()
     }
+  }
+
+  const saveArticle = async (topic: Topic, content: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return // Not logged in, skip saving
+
+      // Extract title from first line of markdown
+      const firstLine = content.split('\n')[0].replace(/^#+\s*/, '').trim()
+      const wordCount = content.split(/\s+/).length
+
+      await supabase.from("articles").insert({
+        user_id: session.user.id,
+        title: firstLine || topic.title,
+        topic: topic.title,
+        content: content,
+        word_count: wordCount,
+      })
+
+      console.log("Article saved to database!")
+    } catch (err) {
+      console.error("Failed to save article:", err)
+      // Don't show error to user — saving failure shouldn't ruin the experience
+  
   }
 
   return (
