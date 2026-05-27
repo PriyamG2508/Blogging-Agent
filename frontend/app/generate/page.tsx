@@ -24,7 +24,7 @@ interface GenerationStep {
   progress: number
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://blogging-agent-backend.onrender.com"
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://blogging-agent-1.onrender.com" || "http://0.0.0.0:8000" 
 
 export default function GeneratePage() {
   const [appState, setAppState] = useState<AppState>("topic-selection")
@@ -219,7 +219,7 @@ export default function GeneratePage() {
     } catch (err) {
       console.error("Failed to save article:", err)
       // Don't show error to user — saving failure shouldn't ruin the experience
-  
+    }
   }
 
   return (
@@ -442,5 +442,4 @@ export default function GeneratePage() {
       </div>
     </div>
   )
-  }
 }
