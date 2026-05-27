@@ -66,9 +66,6 @@ export default function LandingPage() {
                 <span>Generate My First Article</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-slate-300">
-                Watch 2-min Demo
-              </Button>
             </div>
           </div>
 
